@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Room {
+  id        String    @id @default(cuid())
+  code      String    @unique
+  name      String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  players   Player[]
+  packId    String?
+  pack      Pack?     @relation(fields: [packId], references: [id])
+}
+
+model Player {
+  id        String   @id @default(cuid())
+  name      String
+  score     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  room      Room     @relation(fields: [roomId], references: [id])
+  roomId    String
+  customization CharacterCustomization?
+}
+
+model Pack {
+  id          String    @id @default(cuid())
+  name        String
+  description String
+  isPublic    Boolean   @default(false)
+  timeLimit   Int       @default(30)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  rooms       Room[]
+  questions   Question[]
+}
+
+model Question {
+  id            String   @id @default(cuid())
+  question      String
+  options       String[]
+  correctAnswer Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  pack          Pack     @relation(fields: [packId], references: [id])
+  packId        String
+}
+
+model CharacterCustomization {
+  id        String   @id @default(cuid())
+  color     String
+  glasses   Int
+  smile     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  player    Player   @relation(fields: [playerId], references: [id])
+  playerId  String   @unique
+} 
